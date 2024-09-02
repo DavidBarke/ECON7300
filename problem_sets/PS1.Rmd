@@ -1,0 +1,57 @@
+---
+title: "ECON 7300: Problem Set 1"
+author: David Barkemeyer
+output: html_document
+---
+
+```{r, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+
+### Question 4
+
+Define $p_1(x)$ and $p_2(x)$:
+
+```{r}
+p_1 <- \(x) 1 / x / sqrt(2 * pi) * exp(-log(x)^2 / 2)
+p_2 <- \(x) p_1(x) * (1 + sin(2 * pi * log(x)))
+```
+
+Plot them on $[0, 5]$:
+
+```{r}
+n <- 1000
+xmin <- 0
+xmax <- 5
+x <- seq(xmin, xmax, length.out = n + 1)
+x[1] <- 1e-3
+
+tibble(x = x) |>
+  mutate(
+    p_1 = p_1(x),
+    p_2 = p_2(x)
+  ) |>
+  pivot_longer(
+    c(p_1, p_2),
+    names_to = "p",
+    values_to = "p_x"
+  ) |>
+  mutate(
+    p = factor(
+      p, 
+      levels = c("p_1", "p_2"),
+      labels = c("1", "2")
+    )
+  ) |>
+  ggplot(aes(x = x, y = p_x, color = p)) +
+  geom_line() +
+  theme_bw() +
+  labs(
+    x = "x",
+    y = expression(p[i](x)),
+    color = "i"
+  )
+```
+
