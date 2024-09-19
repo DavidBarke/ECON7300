@@ -1,0 +1,53 @@
+---
+title: 'ECON 7300: Problem Set 2'
+author: "David Barkemeyer"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(purrr)
+```
+
+### Question 1 (a)
+
+Maximize $\theta$ as a function of $c$:
+
+```{r}
+theta_max <- function(c) {
+  optimize(
+    \(theta) {
+      case_when(
+        theta > 0 ~ theta * pnorm(c - theta),
+        theta == 0 ~ 0,
+        theta < 0 ~ - theta * (1 - pnorm(c - theta))
+      )
+    },
+    interval = c(-5, 5),
+    maximum = TRUE
+  )$maximum
+}
+
+c_theta <- tibble(c = seq(-2, 2, length.out = 101)) |>
+  mutate(theta = map_dbl(c, theta_max))
+
+ggplot(c_theta, aes(x = c, y = theta)) +
+  geom_point() +
+  labs(
+    x = "c",
+    y = expression(theta)
+  ) +
+  theme_bw()
+```
+
+For $c = 0$, $\theta^*$ can be any combination of $\theta^*(+0)$ and $\theta^*(-0)$.
+
+```{r}
+theta_max(1e-12)
+theta_max(-1e-12)
+```
+
+
